@@ -142,6 +142,8 @@ export default function ManageBikes() {
           typeof filter.rating === "string"
             ? filter.rating
             : filter.rating?.toString() || "All",
+        city: filter.city,
+        state: filter.state,
       },
       { method: "get" }
     );

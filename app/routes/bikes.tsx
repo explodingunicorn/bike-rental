@@ -17,6 +17,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { FaRegClosedCaptioning } from "react-icons/fa";
 import {
   ActionFunction,
   json,
@@ -50,11 +51,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   let bikes;
   if (bikeIds.length) {
     const bikeQuery = buildBikeFilterQuery(searchParams);
-    const { error, data: bikesAvailable } = await bikeQuery.not(
-      "id",
-      "in",
-      `(${bikeIds.join(",")})`
-    );
+    const { error, data: bikesAvailable } = await bikeQuery
+      .not("id", "in", `(${bikeIds.join(",")})`)
+      .eq("can_rent", true);
     bikes = bikesAvailable;
   } else {
     const { data: bikesAvailable } = await supabase
@@ -140,6 +139,15 @@ export default function Bikes() {
     }
   };
 
+  const onBikeFilterSubmit = () => {
+    submit({
+      startDate,
+      endDate,
+      ...bikeFilter,
+      rating: bikeFilter.rating?.toString() || "",
+    });
+  };
+
   return (
     <>
       <VStack spacing="4" alignItems={"flex-start"}>
@@ -203,7 +211,7 @@ export default function Bikes() {
           {...bikeFilter}
           onChange={setBikeFilter}
           loading={false}
-          onSubmit={() => {}}
+          onSubmit={onBikeFilterSubmit}
         />
         <Grid
           templateColumns={"repeat(3, 1fr)"}

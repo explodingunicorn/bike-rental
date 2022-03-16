@@ -80,7 +80,7 @@ const Document = withEmotionCache(
 );
 
 export const meta: MetaFunction = () => {
-  return { title: "New Remix App" };
+  return { title: "Bike rental" };
 };
 
 export const loader: LoaderFunction = async ({ request, context }) => {

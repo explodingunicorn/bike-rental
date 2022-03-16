@@ -66,6 +66,7 @@ export const action: ActionFunction = async ({ request }) => {
       const { error, data } = await serviceSupabase.auth.api.createUser({
         email,
         password,
+        email_confirm: true,
       });
       if (error) {
         return json({ error });

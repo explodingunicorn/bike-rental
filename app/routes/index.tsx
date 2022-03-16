@@ -116,7 +116,7 @@ export default function Index() {
   const actionData = useActionData() || {};
   const [login, setLogin] = useState(true);
   const [email, setEmail] = useState("abcorey7@gmail.com");
-  const [password, setPassword] = useState("asdfasdfasdf");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (actionData.registrationComplete) {
