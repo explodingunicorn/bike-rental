@@ -1,10 +1,15 @@
 import {
+  json,
   Links,
   LiveReload,
+  LoaderFunction,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
+  useSubmit,
 } from "remix";
 import type { MetaFunction } from "remix";
 import React, { useContext, useEffect } from "react";
@@ -12,6 +17,10 @@ import { withEmotionCache } from "@emotion/react";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import { ServerStyleContext, ClientStyleContext } from "./context";
+import { AppContainer } from "./components/AppContainer";
+import { expiredJwtGuard, managerGuard } from "./utils/guards";
+import { destroySession, getSession } from "./sessions";
+import { setApiAuth } from "./utils/setApiAuth";
 
 // root.tsx
 
@@ -74,11 +83,44 @@ export const meta: MetaFunction = () => {
   return { title: "New Remix App" };
 };
 
+export const loader: LoaderFunction = async ({ request, context }) => {
+  if (new URL(request.url).searchParams.has("logout")) {
+    const session = await getSession(request.headers.get("Cookie"));
+    return redirect("/", {
+      headers: {
+        "Set-Cookie": await destroySession(session),
+      },
+    });
+  }
+  const root = request.url.endsWith("/");
+  if (!root) {
+    const jwtExpired = await expiredJwtGuard(request);
+    if (jwtExpired) return jwtExpired;
+  }
+  const isManagerRoute = request.url.includes("manage");
+  if (isManagerRoute) {
+    const accessDenied = await managerGuard(request);
+    if (accessDenied) {
+      return accessDenied;
+    }
+  }
+  return json({ manager: isManagerRoute });
+};
+
 export default function App() {
+  const submit = useSubmit();
+  const loaderData = useLoaderData() || {};
+
+  const onLogout = () => {
+    submit({ logout: "true" }, { method: "get" });
+  };
+
   return (
     <Document>
       <ChakraProvider>
-        <Outlet />
+        <AppContainer manager={loaderData.manager} onLogout={onLogout}>
+          <Outlet />
+        </AppContainer>
       </ChakraProvider>
     </Document>
   );
