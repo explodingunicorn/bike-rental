@@ -25,7 +25,7 @@ import { commitSession, getSession } from "~/sessions";
 import { Session } from "@supabase/supabase-js";
 
 const validatePassword = (pass: string) => {
-  return pass.length >= 10 && pass.length <= 30;
+  return pass.length > 5 && pass.length <= 30;
 };
 
 const finishLoginAndRedirect = async (session: Session, path: string) => {
@@ -176,9 +176,7 @@ export default function Index() {
                 placeholder="password"
               />
               {!login && (
-                <FormHelperText>
-                  Must be between 10-30 characters
-                </FormHelperText>
+                <FormHelperText>Must be between 5-30 characters</FormHelperText>
               )}
             </FormControl>
             <Button

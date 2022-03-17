@@ -2,6 +2,7 @@ import {
   ActionFunction,
   json,
   LoaderFunction,
+  useActionData,
   useLoaderData,
   useSubmit,
   useTransition,
@@ -29,8 +30,8 @@ import {
 import { Reservation } from "~/types/reservation";
 import { setApiAuth } from "~/utils/setApiAuth";
 import { FormEvent, useState } from "react";
-import { Bike } from "~/types/bike";
 import { Review } from "~/types/review";
+import { GeneralError } from "~/components/GeneralError";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await setApiAuth(request);
@@ -100,7 +101,9 @@ export default function Reservations() {
   const loaderData = useLoaderData<{
     reservations?: ReservationCardProps["reservation"][];
     reviews?: Review[];
+    error?: string;
   }>();
+  const actionData = useActionData<{ error?: string }>();
   const transition = useTransition();
 
   const onReservationCancel = (
@@ -131,6 +134,7 @@ export default function Reservations() {
   return (
     <>
       <Stack dir="column" spacing="6">
+        {(loaderData.error || actionData?.error) && <GeneralError />}
         <Heading as="h1">My reservations</Heading>
         <Grid templateColumns="repeat(3, 1fr)" gap="6">
           {loaderData.reservations?.map((reservation) => (

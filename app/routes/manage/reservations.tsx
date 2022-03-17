@@ -14,6 +14,7 @@ import { User } from "~/types/user";
 import { Bike } from "~/types/bike";
 import { Card } from "~/components/Card";
 import { ReservationCard } from "~/components/ReservationCard";
+import { GeneralError } from "~/components/GeneralError";
 
 type UserReservations = User & { reservations: Reservation[] };
 type BikeReservations = Bike & { reservations: Reservation[] };
@@ -37,8 +38,10 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function ManageReservations() {
   const submit = useSubmit();
-  const loaderData =
-    useLoaderData<{ reservations?: (UserReservations & BikeReservations)[] }>();
+  const loaderData = useLoaderData<{
+    reservations?: (UserReservations & BikeReservations)[];
+    error?: string;
+  }>();
   const [searchParams] = useSearchParams();
   const [reservationSelection, setReservationSelection] = useState("users");
 
@@ -54,6 +57,7 @@ export default function ManageReservations() {
 
   return (
     <Stack direction="column" spacing="6">
+      {loaderData.error && <GeneralError />}
       <Heading as="h1">Reservations</Heading>
       <Box>
         <Select value={reservationSelection} onChange={onSelectChange}>

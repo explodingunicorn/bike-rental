@@ -24,11 +24,13 @@ import {
   useSearchParams,
   useTransition,
   useSubmit,
+  useActionData,
 } from "remix";
 import { supabase } from "~/api";
 import { BikeCard } from "~/components/BikeCard";
 import { BikeEditor } from "~/components/BikeEditor";
 import { BikeFilter, useBikeFilter } from "~/components/BikeFilter";
+import { GeneralError } from "~/components/GeneralError";
 import { Bike } from "~/types/bike";
 import { buildBikeFilterQuery } from "~/utils/buildBikeFilterQuery";
 import { setApiAuth } from "~/utils/setApiAuth";
@@ -106,7 +108,8 @@ export default function ManageBikes() {
     bike: Bike | undefined;
   } | null>();
   const submit = useSubmit();
-  const loaderData = useLoaderData<{ bikes?: Bike[] }>();
+  const loaderData = useLoaderData<{ bikes?: Bike[]; error?: string }>();
+  const actionData = useActionData<{ error?: string }>();
   const transition = useTransition();
   const requestFetcher = useFetcher<{ bikes: Bike[] }>();
 
@@ -162,6 +165,7 @@ export default function ManageBikes() {
   return (
     <>
       <Stack dir="column" spacing="8">
+        {(loaderData.error || actionData?.error) && <GeneralError />}
         <Flex dir="row" alignItems={"center"} justifyContent="space-between">
           <Heading as="h1">Manage Bikes</Heading>
           <Button

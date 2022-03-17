@@ -22,11 +22,13 @@ import {
   ActionFunction,
   json,
   LoaderFunction,
+  useActionData,
   useLoaderData,
   useSubmit,
   useTransition,
 } from "remix";
 import { serviceSupabase, supabase } from "~/api";
+import { GeneralError } from "~/components/GeneralError";
 import { UserCard } from "~/components/UserCard";
 import { User } from "~/types/user";
 import { setApiAuth } from "~/utils/setApiAuth";
@@ -37,6 +39,9 @@ export const loader: LoaderFunction = async ({ request }) => {
     .from<User>("user_permissions")
     .select()
     .not("id", "eq", session.user?.id);
+  if (error) {
+    return json({ error: "Can't get users" });
+  }
   return json({ users });
 };
 
@@ -110,7 +115,8 @@ export default function ManageUsers() {
   const [userName, setUserName] = useState("");
   const [isManager, setIsManager] = useState(false);
   const [password, setPassword] = useState("");
-  const loaderData = useLoaderData<{ users?: User[] }>();
+  const loaderData = useLoaderData<{ users?: User[]; error?: string }>();
+  const actionData = useActionData<{ error?: string }>();
 
   const onCreatePressed = () => {
     setCreatePressed(true);
@@ -158,6 +164,7 @@ export default function ManageUsers() {
   return (
     <>
       <Stack dir="column" spacing="6">
+        {(loaderData.error || actionData?.error) && <GeneralError />}
         <Flex
           direction="row"
           justifyContent="space-between"

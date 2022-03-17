@@ -22,6 +22,7 @@ import {
   ActionFunction,
   json,
   LoaderFunction,
+  useActionData,
   useLoaderData,
   useSearchParams,
   useSubmit,
@@ -29,6 +30,7 @@ import {
 import { supabase } from "~/api";
 import { BikeCard } from "~/components/BikeCard";
 import { BikeFilter, useBikeFilter } from "~/components/BikeFilter";
+import { GeneralError } from "~/components/GeneralError";
 import { Bike } from "~/types/bike";
 import { Reservation } from "~/types/reservation";
 import { buildBikeFilterQuery } from "~/utils/buildBikeFilterQuery";
@@ -41,12 +43,13 @@ export const loader: LoaderFunction = async ({ request }) => {
   const endDate =
     searchParams.get("endDate") || new Date().toISOString().substring(0, 10);
   await setApiAuth(request);
-  const { data: reservations } = await supabase
+  const { error: reservationError, data: reservations } = await supabase
     .from<Reservation>("reservations")
     .select()
     .or(
       `and(end.gte.${startDate},start.lte.${startDate}),and(start.lte.${endDate},end.gte.${endDate}),and(end.lte.${endDate},start.gte.${startDate})`
     );
+  if (reservationError) return json({ error: "Error getting reservations" });
   const bikeIds = reservations?.map((reservation) => reservation.bike_id) ?? [];
   let bikes;
   if (bikeIds.length) {
@@ -54,11 +57,14 @@ export const loader: LoaderFunction = async ({ request }) => {
     const { error, data: bikesAvailable } = await bikeQuery
       .not("id", "in", `(${bikeIds.join(",")})`)
       .eq("can_rent", true);
+    if (error) return json({ error: "Error getting bikes" });
     bikes = bikesAvailable;
   } else {
-    const { data: bikesAvailable } = await supabase
+    const { error, data: bikesAvailable } = await supabase
       .from<Bike>("bikes")
-      .select();
+      .select()
+      .eq("can_rent", true);
+    if (error) return json({ error: "Error getting bikes" });
     bikes = bikesAvailable;
   }
   return json({ bikes, startDate });
@@ -89,7 +95,9 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Bikes() {
-  const loaderData = useLoaderData<{ bikes?: Bike[]; startDate: string }>();
+  const loaderData =
+    useLoaderData<{ bikes?: Bike[]; startDate: string; error?: string }>();
+  const actionData = useActionData<{ error?: string }>();
   const [bikeFilter, setBikeFilter, overrideBikeFilter] = useBikeFilter();
   const { onOpen, onClose, isOpen } = useDisclosure();
   const [searchParams] = useSearchParams();
@@ -150,7 +158,8 @@ export default function Bikes() {
 
   return (
     <>
-      <VStack spacing="4" alignItems={"flex-start"}>
+      <VStack spacing="6" alignItems={"flex-start"}>
+        {(loaderData.error || actionData?.error) && <GeneralError />}
         <Heading as="h1">Rent a bike</Heading>
         <Flex
           dir="row"

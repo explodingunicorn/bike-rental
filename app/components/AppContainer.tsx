@@ -1,7 +1,9 @@
-import { Button, Flex, Heading } from "@chakra-ui/react";
+import { Button, Flex, Heading, Image } from "@chakra-ui/react";
 import styled from "@emotion/styled";
-import React, { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren } from "react";
 import { Link, useLocation } from "remix";
+
+import BikeLogo from "~/images/bikelogo.png";
 
 const Container = styled.div`
   margin-top: var(--chakra-space-20);
@@ -37,9 +39,12 @@ export const AppContainer: FC<
     <Container>
       <Navigation>
         <Flex dir="row" alignItems={"center"}>
-          <Heading as="h2" size="md" display="inline-block">
-            {manager ? "Manager Portal" : "Bike rental"}
-          </Heading>
+          <Flex gap="4">
+            <Image height="20px" src={BikeLogo} />
+            <Heading as="h2" size="md" display="inline-block">
+              {manager ? "Manager Portal" : "Bike rental"}
+            </Heading>
+          </Flex>
           {location.pathname !== "/" && (
             <Flex flex="1" justifyContent={"flex-end"} gap="4">
               {links.map((link) => (
