@@ -144,7 +144,7 @@ export default function Index() {
             )}
             {actionData.registrationComplete && (
               <Message type="success">
-                Check your email to complete registration.
+                Registration complete, please login.
               </Message>
             )}
             {loginRoute.data?.registrationConfirmed && (

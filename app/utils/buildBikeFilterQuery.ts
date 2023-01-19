@@ -10,6 +10,7 @@ export const buildBikeFilterQuery = (params: URLSearchParams) => {
     city: (params.get("city") as BikeFilter["city"]) || "",
     state: (params.get("state") as BikeFilter["state"]) || "",
   };
+  console.log(filter);
   let query = supabase.from<Bike>("bikes").select();
   Object.keys(filter).forEach((key) => {
     const value = filter[key as keyof BikeFilter];

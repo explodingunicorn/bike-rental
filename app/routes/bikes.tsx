@@ -60,10 +60,11 @@ export const loader: LoaderFunction = async ({ request }) => {
     if (error) return json({ error: "Error getting bikes" });
     bikes = bikesAvailable;
   } else {
-    const { error, data: bikesAvailable } = await supabase
-      .from<Bike>("bikes")
-      .select()
-      .eq("can_rent", true);
+    const bikeQuery = buildBikeFilterQuery(searchParams);
+    const { error, data: bikesAvailable } = await bikeQuery.eq(
+      "can_rent",
+      true
+    );
     if (error) return json({ error: "Error getting bikes" });
     bikes = bikesAvailable;
   }
